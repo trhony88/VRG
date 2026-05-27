@@ -1,0 +1,50 @@
+# ============================================
+# VaRyGasy Gaming - Docker Compose
+# ============================================
+# Usage:
+#   docker compose up -d          (production)
+#   docker compose up --build    (rebuild après modif)
+#   docker compose down           (arrêter)
+#   docker compose logs -f        (voir les logs)
+# ============================================
+
+services:
+  # ─── Application Next.js ───
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: vrg-app
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    env_file:
+      - .env
+    environment:
+      - NODE_ENV=production
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3000/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # ─── Caddy (Reverse Proxy + HTTPS automatique) ───
+  # Décommenter et configurer si tu as un domaine
+  # caddy:
+  #   image: caddy:2-alpine
+  #   container_name: vrg-caddy
+  #   restart: unless-stopped
+  #   ports:
+  #     - "80:80"
+  #     - "443:443"
+  #   volumes:
+  #     - ./Caddyfile:/etc/caddy/Caddyfile
+  #     - caddy_data:/data
+  #     - caddy_config:/config
+  #   depends_on:
+  #     - app
+
+# volumes:
+#   caddy_data:
+#   caddy_config:

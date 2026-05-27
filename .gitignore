@@ -1,0 +1,96 @@
+# ============================================
+# VaRyGasy Gaming - Git Ignore
+# ============================================
+
+# --- Dependencies ---
+node_modules
+/.pnp
+.pnp.*
+.yarn/*
+!.yarn/patches
+!.yarn/plugins
+!.yarn/releases
+!.yarn/versions
+
+# --- Next.js ---
+/.next/
+/out/
+next-env.d.ts
+*.tsbuildinfo
+
+# --- Build & Production ---
+/build
+/dist
+.turbo
+
+# --- Environment Variables (SECRÈTES - ne jamais committer) ---
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# --- Database ---
+/db/*.db
+/db/*.db-journal
+/prisma/migrations/
+
+# --- Logs ---
+*.log
+dev.log
+dev.out.log
+server.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+
+# --- Testing & Coverage ---
+/coverage
+test
+prompt
+
+# --- Misc OS files ---
+.DS_Store
+Thumbs.db
+*.pem
+
+# --- Vercel ---
+.vercel
+
+# --- IDE & Editor ---
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# --- AI / Sandbox / Skills ---
+.claude
+.z-ai-config
+/skills/
+agent-ctx/
+.zai/
+
+# --- Upload & temp ---
+/upload/
+*.tmp
+*.bak
+
+# --- Download / Old source (pas besoin dans Git) ---
+/download/
+
+# --- Examples (démo, pas en prod) ---
+/examples/
+
+# --- Worklog ---
+worklog.md
+
+# --- Supabase local ---
+supabase/.temp/
+
+# --- Mini services runtime ---
+mini-services/*/node_modules/
+
+# --- Docker (si utilisé en local) ---
+docker-compose.override.yml

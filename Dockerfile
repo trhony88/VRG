@@ -1,0 +1,50 @@
+# ============================================
+# VaRyGasy Gaming - Dockerfile
+# ============================================
+# Stage 1 : Installation des dépendances
+FROM node:20-alpine AS deps
+RUN apk add --no-cache libc6-compat
+WORKDIR /app
+
+COPY package.json bun.lock ./
+RUN npm install -g bun@1
+RUN bun install --frozen-lockfile
+
+# Stage 2 : Build de l'application
+FROM node:20-alpine AS builder
+WORKDIR /app
+
+COPY --from=deps /app/node_modules ./node_modules
+COPY . .
+
+# Créer un .env vide si absent (build ne crash pas)
+RUN if [ ! -f .env ]; then cp .env.example .env; fi
+
+ENV NEXT_TELEMETRY_DISABLED=1
+RUN npm install -g bun@1
+RUN bun run build
+
+# Stage 3 : Production
+FROM node:20-alpine AS runner
+WORKDIR /app
+
+ENV NODE_ENV=production
+ENV NEXT_TELEMETRY_DISABLED=1
+
+RUN addgroup --system --gid 1001 nodejs
+RUN adduser --system --uid 1001 nextjs
+
+# Copier les fichiers nécessaires
+COPY --from=builder /app/public ./public
+COPY --from=builder /app/.next/standalone ./
+COPY --from=builder /app/.next/static ./.next/static
+COPY --from=builder /app/prisma ./prisma
+
+USER nextjs
+
+EXPOSE 3000
+
+ENV PORT=3000
+ENV HOSTNAME="0.0.0.0"
+
+CMD ["node", "server.js"]

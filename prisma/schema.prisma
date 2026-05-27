@@ -1,0 +1,141 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id           Int       @id @default(autoincrement())
+  name         String
+  phone        String    @unique
+  password     String
+  referralCode String?   @unique
+  referredBy   Int?
+  role         String    @default("client")
+  createdAt    DateTime  @default(now())
+  orders       Order[]
+  sentMessages     ChatMessage[] @relation("MessageSender")
+  adminLogs        AdminLog[]
+  chatRoomMembers ChatRoomMember[]
+  supportRooms     ChatRoom[] @relation("SupportClient")
+}
+
+model Product {
+  id          Int         @id @default(autoincrement())
+  name        String
+  description String?
+  price       Int         @default(0)
+  category    String?
+  stock       Int         @default(0)
+  images      String?
+  active      Boolean     @default(true)
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+}
+
+model Order {
+  id              Int          @id @default(autoincrement())
+  userId          Int
+  payment         String
+  address         String
+  zone            String?
+  deliveryFee     Int          @default(0)
+  hours           String?
+  note            String?
+  total           Int
+  transferPhone   String?
+  transferName    String?
+  transferId      String?
+  status          String       @default("En attente")
+  paymentConfirmed Boolean     @default(false)
+  createdAt       DateTime     @default(now())
+  user            User         @relation(fields: [userId], references: [id])
+  items           OrderItem[]
+}
+
+model OrderItem {
+  id       Int @id @default(autoincrement())
+  orderId  Int
+  name     String
+  qty      Int
+  price    Int
+  order    Order @relation(fields: [orderId], references: [id])
+}
+
+model Referral {
+  id         Int  @id @default(autoincrement())
+  referrerId Int
+  referredId Int  @unique
+  createdAt  DateTime @default(now())
+}
+
+model Visit {
+  id    Int    @id @default(autoincrement())
+  date  String @unique
+  count Int    @default(1)
+}
+
+model Setting {
+  key       String   @id
+  value     String?
+  updatedAt DateTime @updatedAt
+}
+
+model TeamMember {
+  id          Int      @id @default(autoincrement())
+  name        String
+  role        String?
+  description String?
+  photo       String?
+  orderIndex  Int      @default(0)
+  active      Boolean  @default(true)
+  createdAt   DateTime @default(now())
+}
+
+model AdminLog {
+  id         Int      @id @default(autoincrement())
+  adminId    Int
+  adminName  String
+  action     String
+  targetType String
+  targetId   Int
+  targetName String
+  oldValue   String?
+  newValue   String?
+  createdAt  DateTime @default(now())
+  admin      User     @relation(fields: [adminId], references: [id])
+}
+
+model ChatRoom {
+  id        Int      @id @default(autoincrement())
+  type      String
+  name      String?
+  clientId  Int?
+  createdAt DateTime @default(now())
+  members   ChatRoomMember[]
+  messages  ChatMessage[]
+  client    User?    @relation("SupportClient", fields: [clientId], references: [id])
+}
+
+model ChatRoomMember {
+  roomId Int
+  userId Int
+  user   User     @relation(fields: [userId], references: [id])
+  room   ChatRoom @relation(fields: [roomId], references: [id])
+
+  @@id([roomId, userId])
+}
+
+model ChatMessage {
+  id         Int      @id @default(autoincrement())
+  roomId     Int
+  senderId   Int
+  senderName String
+  body       String
+  createdAt  DateTime @default(now())
+  room       ChatRoom @relation(fields: [roomId], references: [id])
+  sender     User     @relation("MessageSender", fields: [senderId], references: [id])
+}
